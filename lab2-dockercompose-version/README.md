@@ -1,59 +1,82 @@
 # INF343 — Laboratorio 2: DiscoPass
 
+**Grupo**: XX
+
+**Integrantes**:
+- Nombre Apellido — Rol 20.xxx.xxx-x
+- Nombre Apellido — Rol 20.xxx.xxx-x
+- Nombre Apellido — Rol 20.xxx.xxx-x
+
+---
+
 Sistema distribuido de venta y validación de entradas para discotecas.
 Comunicación estricta por **gRPC + Protocol Buffers**.
 Cada entidad corre en un contenedor Docker separado.
 
-## Integrantes y roles
+## Topología (4 VMs)
 
-- **Broker Central** — coordinación, validación, escritura/lectura distribuida
-- **Nodos DB (DB1, DB2, DB3)** — almacenamiento replicado (N=3, W=2, R=2)
-- **Banco USM** — servicio de pago probabilístico
-- **Productores (DataClub, Dockers Night, GoLounge, GeorgieHouse)** — generan eventos
-- **Consumidores (ClienteA, ClienteB)** — compran entradas
-
-## Arquitectura
+| VM | IP | Componentes | Puertos |
+|----|----|-------------|---------|
+| **dist057** | 10.35.168.67 | Broker | 50051 |
+| **dist058** | 10.35.168.68 | DataClub, Dockers Night, GoLounge, GeorgieHouse + DB3 | 50063 |
+| **dist059** | 10.35.168.69 | ClienteA, ClienteB + DB2 | 50062 |
+| **dist060** | 10.35.168.70 | Banco USM + DB1 | 50052, 50061 |
 
 ```
 Productores ──gRPC──> Broker ──gRPC──> Nodos DB (DB1, DB2, DB3)
 Consumidores ──gRPC──> Broker ──gRPC──> Banco USM
 ```
 
-- **Broker** = único punto de coordinación (registro, validación, idempotencia,
-  escritura N=3/W=2, lectura R=2, resincronización de nodos caídos, reporte final).
-- **Nodos DB**: replicación tipo DynamoDB con consistencia eventual.
-  Fallo simulado interno (caída temporal + resincronización vía `SolicitarBacklog`).
-- **Banco USM**: aprueba pagos con 80% probabilidad (90% si medio_pago=credito).
-  Timeout de 3s en el broker → compra queda "pendiente" si el banco no responde.
-- **Resincronización mediada por broker**: cuando un nodo revive, pide el backlog
-  al broker (no replica nodo-a-nodo), respetando la regla de que el broker es el
-  único punto autorizado.
+- **Broker** = único punto de coordinación (registro, validación, idempotencia, escritura N=3/W=2, lectura R=2, resincronización de nodos caídos, reporte final).
+- **Nodos DB**: replicación tipo DynamoDB con consistencia eventual. Fallo simulado interno (caída temporal + resincronización vía `SolicitarBacklog`).
+- **Banco USM**: aprueba pagos con 80% probabilidad (90% si medio_pago=credito). Timeout de 3s en el broker → compra queda "pendiente" si el banco no responde.
+- **Resincronización mediada por broker**: cuando un nodo revive, pide el backlog al broker (no replica nodo-a-nodo), respetando la regla de que el broker es el único punto autorizado.
 
-## Cómo ejecutar
+## Requisitos
 
-### Opción 1: Todo en una máquina (pruebas)
+- Docker Engine + docker-compose (v1 o v2)
+- Las 4 VMs deben tener conectividad de red entre sí (IPs 10.35.168.67-70)
+
+## Cómo ejecutar en 4 VMs
+
+Arrancar **dist057 primero** y esperar ~5s antes de las demás.
+
+**VM1 — dist057 (Broker):**
+```bash
+cd ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version
+make docker-VM1
+```
+
+**VM2 — dist058 (Productores + DB3):**
+```bash
+cd ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version
+make docker-VM2
+```
+
+**VM3 — dist059 (Consumidores + DB2):**
+```bash
+cd ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version
+make docker-VM3
+```
+
+**VM4 — dist060 (Banco + DB1):**
+```bash
+cd ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version
+make docker-VM4
+```
+
+Para detener: `Ctrl+C` en cada terminal. O desde cualquier VM:
+```bash
+docker-compose -f docker-compose-vm1.yml down   # según la VM
+```
+
+### Opción alternativa: Todo en una máquina (pruebas)
 
 ```bash
 make up
 ```
 
-### Opción 2: Distribuido en 4 VMs
-
-```bash
-# VM1: Broker
-make docker-VM1
-
-# VM2: Productores + DB3
-make docker-VM2
-
-# VM3: Consumidores + DB2
-make docker-VM3
-
-# VM4: Banco + DB1
-make docker-VM4
-```
-
-### Opción 3: Sin Docker (desarrollo rápido)
+### Opción sin Docker (desarrollo rápido)
 
 ```bash
 # Terminal 1
@@ -73,6 +96,18 @@ go run ./cmd/productor -discoteca DataClub -broker localhost:50051 -catalogo con
 # Terminal 7
 go run ./cmd/consumidor -id ClienteA -broker localhost:50051 -medio credito -intervalo 10
 ```
+
+## Resultados
+
+- **Reporte.txt** — se genera en el broker (dist057) cada 20s. Revisar con:
+  ```bash
+  ssh dist057 cat ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version/Reporte.txt
+  ```
+- **CSV de usuarios** — se generan en dist059:
+  ```bash
+  ssh dist059 cat ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version/usuario_ClienteA.csv
+  ssh dist059 cat ~/lab2/INF343-Laboratorio2/lab2-dockercompose-version/usuario_ClienteB.csv
+  ```
 
 ## Configuración (flags / variables de entorno)
 

@@ -1,11 +1,11 @@
 # INF343 — Laboratorio 2: DiscoPass
 
-**Grupo**: XX
+**Grupo**: 15
 
 **Integrantes**:
-- Nombre Apellido — Rol 20.xxx.xxx-x
-- Nombre Apellido — Rol 20.xxx.xxx-x
-- Nombre Apellido — Rol 20.xxx.xxx-x
+- Andreu Lechuga — 202073595-6
+- Jeremy Zavala — 202044535-4
+- Camila Rosales — 202173631-k
 
 ---
 

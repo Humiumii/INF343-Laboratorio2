@@ -1,6 +1,6 @@
-broker
-dbnode
-banco
-productor
-consumidor
+/broker
+/dbnode
+/banco
+/productor
+/consumidor
 *.exe

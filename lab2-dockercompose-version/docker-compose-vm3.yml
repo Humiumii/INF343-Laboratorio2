@@ -1,0 +1,22 @@
+services:
+  db2:
+    build:
+      context: .
+      args:
+        ENTIDAD: dbnode
+    network_mode: host
+    command: ["-id", "DB2", "-puerto", "50062", "-broker", "10.35.168.67:50051"]
+  cliente_a:
+    build:
+      context: .
+      args:
+        ENTIDAD: consumidor
+    network_mode: host
+    command: ["-id", "ClienteA", "-broker", "10.35.168.67:50051", "-medio", "credito", "-intervalo", "15"]
+  cliente_b:
+    build:
+      context: .
+      args:
+        ENTIDAD: consumidor
+    network_mode: host
+    command: ["-id", "ClienteB", "-broker", "10.35.168.67:50051", "-medio", "debito", "-intervalo", "20"]

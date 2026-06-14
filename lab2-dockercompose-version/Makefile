@@ -45,21 +45,21 @@ proto:
 docker-build:
 	docker compose build
 
-# VM1: Broker
+# VM1: Broker (MV1: dist057 — 10.35.168.67)
 docker-VM1: banner
-	docker compose up broker
+	docker compose -f docker-compose-vm1.yml up
 
-# VM2: Productores + DB3
+# VM2: Productores + DB3 (MV2: dist058 — 10.35.168.68)
 docker-VM2: banner
-	docker compose up dataclub dockersnight golounge georgiehouse db3
+	docker compose -f docker-compose-vm2.yml up
 
-# VM3: Consumidores + DB2
+# VM3: Consumidores + DB2 (MV3: dist059 — 10.35.168.69)
 docker-VM3: banner
-	docker compose up cliente_a cliente_b db2
+	docker compose -f docker-compose-vm3.yml up
 
-# VM4: Banco + DB1
+# VM4: Banco + DB1 (MV4: dist060 — 10.35.168.70)
 docker-VM4: banner
-	docker compose up banco db1
+	docker compose -f docker-compose-vm4.yml up
 
 # All services in one machine (for testing).
 # Orden: 1) construir imagenes (refleja cambios de codigo), 2) banner de

@@ -1,0 +1,15 @@
+services:
+  banco:
+    build:
+      context: .
+      args:
+        ENTIDAD: banco
+    network_mode: host
+    command: ["-puerto", "50052", "-broker", "10.35.168.67:50051"]
+  db1:
+    build:
+      context: .
+      args:
+        ENTIDAD: dbnode
+    network_mode: host
+    command: ["-id", "DB1", "-puerto", "50061", "-broker", "10.35.168.67:50051"]

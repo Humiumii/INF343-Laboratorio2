@@ -1,0 +1,36 @@
+services:
+  db3:
+    build:
+      context: .
+      args:
+        ENTIDAD: dbnode
+    network_mode: host
+    command: ["-id", "DB3", "-puerto", "50063", "-broker", "10.35.168.67:50051"]
+  dataclub:
+    build:
+      context: .
+      args:
+        ENTIDAD: productor
+    network_mode: host
+    command: ["-discoteca", "DataClub", "-broker", "10.35.168.67:50051", "-catalogo", "config/catalogo_30.json"]
+  dockersnight:
+    build:
+      context: .
+      args:
+        ENTIDAD: productor
+    network_mode: host
+    command: ["-discoteca", "Dockers Night", "-broker", "10.35.168.67:50051", "-catalogo", "config/catalogo_30.json"]
+  golounge:
+    build:
+      context: .
+      args:
+        ENTIDAD: productor
+    network_mode: host
+    command: ["-discoteca", "GoLounge", "-broker", "10.35.168.67:50051", "-catalogo", "config/catalogo_30.json"]
+  georgiehouse:
+    build:
+      context: .
+      args:
+        ENTIDAD: productor
+    network_mode: host
+    command: ["-discoteca", "GeorgieHouse", "-broker", "10.35.168.67:50051", "-catalogo", "config/catalogo_30.json"]

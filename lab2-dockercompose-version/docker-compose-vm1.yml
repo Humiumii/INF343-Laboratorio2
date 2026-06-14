@@ -1,0 +1,8 @@
+services:
+  broker:
+    build:
+      context: .
+      args:
+        ENTIDAD: broker
+    network_mode: host
+    command: ["-puerto", "50051", "-nodos", "10.35.168.70:50061,10.35.168.69:50062,10.35.168.68:50063", "-banco", "10.35.168.70:50052"]
